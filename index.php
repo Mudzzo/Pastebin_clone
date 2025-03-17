@@ -1,0 +1,48 @@
+<?php
+require_once "config/db.php";
+require_once "includes/header.php";
+$page = isset($_GET['action']) ? $_GET['action'] : 'index';
+?>
+
+<?php require_once "includes/navbar.php";?>
+<?php 
+$stmt = $connect->prepare('SELECT * FROM `snippets` ORDER BY `created_at` DESC');
+$stmt->execute();
+$snippets = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// print_r($snippets);
+?>
+<div class="container-fluid p-3 ms-3">
+    <div class="row">
+        <div class="col-8  posts-container">
+            <table class="table table-dark table-hover">
+                <thead>
+                    <tr>
+                    <th scope="col">Title</th>
+                    <th scope="col">Content</th>
+                    <th scope="col">Syntax</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php 
+                        foreach($snippets as $index => $snippet):
+                    ?>
+                        <tr>
+                        <td><?= $snippet['title']?></td>
+                        <td><?= htmlspecialchars($snippet['content']) ?></td>
+                        <td><?= $snippet['code_lang']?></td>
+                        </tr>
+                    <?php endforeach ?>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-4">
+            <div class="container posts-container p-4">
+                <form class="d-flex flex-column" role="search">
+                    <input class="form-control me-2 mb-4" type="search" placeholder="Search" aria-label="Search">
+                    <button class="btn btn-login " type="submit">Search</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<?php require_once "includes/footer.php";?>
