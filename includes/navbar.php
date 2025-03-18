@@ -9,14 +9,17 @@
     <div class="container-fluid d-flex">
         <ul class="navbar-nav me-4 mb-2 mb-lg-0">
             <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="#">Home</a>
+                <a class="nav-link active" aria-current="page" href="index.php">Home</a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">Link</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link disabled" aria-disabled="true">Create Post</a>
-            </li>
+            <?php if(isset($_SESSION["IsLoggedIn"])): ?>
+                <li class="nav-item">
+                    <a class="nav-link" href="create_snippet.php">Create Snippet</a>
+                </li>
+            <?php else: ?>  
+                <li class="nav-item">
+                    <a class="nav-link disabled" aria-disabled="true">Create Snippet</a>
+                </li>
+            <?php endif; ?>
         </ul>
 
         
