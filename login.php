@@ -2,10 +2,6 @@
 require_once "config/db.php";
 require_once "includes/header.php";
 
-if(!isset($_SESSION['IsLoggedIn'])){
-    header('Location:index.php');
-}
-
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = $_POST['email'];
     $password = sha1($_POST['password']);
