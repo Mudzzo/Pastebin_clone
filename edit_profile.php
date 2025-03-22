@@ -3,7 +3,6 @@ require_once 'config/db.php';
 require_once "includes/header.php";
 require_once "includes/navbar.php";
 
-// Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();

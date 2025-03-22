@@ -3,6 +3,10 @@ require_once "config/db.php";
 require_once "includes/header.php";
 require_once "includes/navbar.php";
 
+if(!isset($_SESSION['IsLoggedIn'])){
+    header('Location:index.php');
+}
+
 if(isset($_GET['query']) && !empty($_GET['query'])){
     $search = isset($_GET['query']) ? trim($_GET['query']) : "";
 

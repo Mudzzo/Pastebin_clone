@@ -9,7 +9,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
-    header("Location: user.php");
+    header("Location: profile.php");
     exit();
 }
 

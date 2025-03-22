@@ -2,6 +2,10 @@
 require_once "config/db.php";
 require_once "includes/header.php";
 
+if(!isset($_SESSION['IsLoggedIn'])){
+    header('Location:index.php');
+}
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = $_POST['email'];
     $password = sha1($_POST['password']);
@@ -14,8 +18,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $_SESSION['FULL_NAME'] = $user['full_name'];
         $_SESSION['IsLoggedIn'] = true;
         $_SESSION['user_id']= $user['id'];
-        // print_r($_SESSION);
-        // exit();
         header('Location:index.php');
     } else {
         $_SESSION['login_error'] = "user doesnt exist";
