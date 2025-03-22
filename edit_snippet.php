@@ -1,61 +1,80 @@
-<?php 
-require_once "config/db.php";
+<?php
+require_once 'config/db.php';
 require_once "includes/header.php";
 require_once "includes/navbar.php";
 
-if(!isset($_SESSION['IsLoggedIn'])){
-    header('Location:index.php');
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
 }
 
+if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+    header("Location: user.php");
+    exit();
+}
+
+$snippet_id = intval($_GET['id']);
 $user_id = $_SESSION['user_id'];
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $title = trim($_POST["title"]);
-    $content = trim($_POST["content"]);
-    $code_lang = trim($_POST["code_lang"]);
+$stmt = $connect->prepare("SELECT title, content, code_lang FROM snippets WHERE post_id = :id AND user_id = :user_id");
+$stmt->execute([':id' => $snippet_id, ':user_id' => $user_id]);
+$snippet = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if (!empty($title) && !empty($content) && !empty($code_lang)) {
-        $stmt = $connect->prepare("INSERT INTO snippets (user_id, title, content, code_lang, created_at) VALUES (?, ?, ?, ?, NOW())");
-        $stmt->execute([$user_id ,$title, $content, $code_lang]);
-        $success = "Snippet added successfully!";
+if (!$snippet) {
+    $_SESSION['error_msg'] = "Snippet not found or you don't have permission to edit it.";
+    header("Location: user.php");
+    exit();
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $title = trim($_POST['title']);
+    $content = trim($_POST['content']);
+    $syntax = $_POST['code_lang'];
+
+    if (!empty($title) && !empty($content) && !empty($syntax)) {
+        $update_stmt = $connect->prepare("UPDATE snippets SET title = :title, content = :content, code_lang = :syntax WHERE post_id = :id AND user_id = :user_id");
+        $update_stmt->execute([
+            ':title' => $title,
+            ':content' => $content,
+            ':syntax' => $syntax,
+            ':id' => $snippet_id,
+            ':user_id' => $user_id
+        ]);
+        $_SESSION['success_msg'] = "Snippet updated successfully.";
+        header("Location: profile.php");
+        exit();
     } else {
-        $error = "All fields are required!";
+        $error = "All fields are required.";
     }
 }
 ?>
 
-
-<div class="container-fluid mt-auto vh-100">
+<div class="container-fluid mt-auto py-3 vh-100">
     <div class="container-lg">
         <div class="row d-flex vh-100 justify-content-center align-items-center">
             <div class="col-8">
                 <div class="card bg-dark text-light p-4 rounded-3 shadow-lg">
-                    <h2 class="text-center mb-4">Create New Snippet</h2>
-
-                    <!-- Display success or error message -->
-                    <?php if (isset($success)): ?>
-                    <div class="alert alert-success"><?= $success ?></div>
-                    <?php elseif (isset($error)): ?>
-                    <div class="alert alert-danger"><?= $error ?></div>
+                    <h2 class="text-center mb-4">Edit Snippet</h2>
+                    <?php if (isset($error)): ?>
+                    <div class="alert alert-danger"> <?= $error ?> </div>
                     <?php endif; ?>
-
-                    <form method="POST" action="">
+                    <form method="POST">
                         <div class="mb-3">
                             <label class="form-label fw-bold">Title</label>
                             <input type="text" name="title" class="form-control bg-secondary text-light border-0"
-                                required>
+                                value="<?= htmlspecialchars($snippet['title']) ?>" required>
                         </div>
-
                         <div class="mb-3">
                             <label class="form-label fw-bold">Content</label>
                             <textarea name="content" class="form-control bg-secondary text-light border-0" rows="5"
-                                required></textarea>
+                                required><?= htmlspecialchars($snippet['content']) ?></textarea>
                         </div>
-
                         <div class="mb-3">
                             <label class="form-label fw-bold">Syntax</label>
                             <select name="code_lang" class="form-control bg-secondary text-light border-0" required>
-                                <option value="plaintext">Plain Text</option>
+                                <option value="<?= $snippet['code_lang'] ?>" selected>
+                                    <?= ucfirst($snippet['code_lang']) ?></option>
+                                    <option value="plaintext">Plain Text</option>
                                 <option value="php">PHP</option>
                                 <option value="javascript">JavaScript</option>
                                 <option value="typescript">TypeScript</option>
@@ -102,11 +121,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 <option value="abap">ABAP</option>
                             </select>
                         </div>
-
-                        <button type="submit" class="btn btn-login w-100 fw-bold">Submit Snippet</button>
+                        <button type="submit" class="btn btn-login w-100 fw-bold">Update Snippet</button>
                     </form>
-
-                    <a href="index.php" class="btn btn-login mt-3 w-100 fw-bold" >Back to Home</a>
+                    <a href="profile.php" class="btn btn-login mt-3 w-100 fw-bold">Back to Profile</a>
                 </div>
             </div>
         </div>
